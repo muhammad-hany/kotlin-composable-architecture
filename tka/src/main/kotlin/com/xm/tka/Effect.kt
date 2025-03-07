@@ -11,6 +11,9 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.locks.ReentrantLock
@@ -32,6 +35,7 @@ import kotlin.concurrent.withLock
  * Source: https://github.com/pointfreeco/swift-composable-architecture/blob/main/Sources/ComposableArchitecture/Effect.swift
  */
 typealias Effect<ACTION> = Observable<ACTION>
+typealias FlowEffect<ACTION> = Flow<ACTION>
 
 /**
  * [Effect] utility functions
@@ -44,12 +48,16 @@ object Effects {
      */
     fun <ACTION : Any> none(): Effect<ACTION> = Observable.empty()
 
+    fun <ACTION : Any> flowNone(): FlowEffect<ACTION> = emptyFlow()
+
     /**
      * Initializes an effect that immediately emits the value passed in.
      *
      * @param action: The action that is immediately emitted by the effect.
      */
     fun <ACTION : Any> just(action: ACTION): Effect<ACTION> = Observable.just(action)
+
+    fun <ACTION : Any> justFlow(action: ACTION): FlowEffect<ACTION> = flowOf(action)
 
     /**
      * Initializes an effect that immediately fails with the error passed in.
@@ -85,6 +93,9 @@ object Effects {
      */
     fun <ACTION : Any> merge(vararg effects: Effect<ACTION>): Effect<ACTION> =
         Observable.merge(effects.toList())
+
+    fun <ACTION : Any> merge(vararg effects: FlowEffect<ACTION>): FlowEffect<ACTION> =
+        kotlinx.coroutines.flow.merge(*effects)
 
     /**
      * Concatenates a variadic list of effects together into a single effect, which runs the effects
@@ -125,6 +136,8 @@ object Effects {
  * Turns any [Flowable] into an `Effect`
  */
 fun <ACTION : Any> Flowable<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
+
+fun <ACTION : Any> Flow<ACTION>.toEffect(): FlowEffect<ACTION> = this
 
 /**
  * Turns any [Single] into an `Effect`
