@@ -16,29 +16,31 @@ class CoroutineStore<STATE : Any, ACTION : Any> private constructor(
     
     fun send(action: ACTION) = sendAction(action)
 
-    fun <LOCAL_STATE : Any, LOCAL_ACTION : Any> view(
-        mapToLocalState: (STATE) -> LOCAL_STATE,
-        mapToGlobalAction: (LOCAL_ACTION) -> ACTION,
+    fun <LOCAL_STATE : Any, LOCAL_ACTION : Any> scope(
+        toLocalState: (STATE) -> LOCAL_STATE,
+        fromLocalAction: (LOCAL_ACTION) -> ACTION,
     ): CoroutineStore<LOCAL_STATE, LOCAL_ACTION> = CoroutineStore(
-        state = state.map { mapToLocalState(it) }.distinctUntilChanged(),
+        state = state.map { toLocalState(it) }.distinctUntilChanged(),
         sendAction = { action ->
-            sendAction(mapToGlobalAction(action))
+            sendAction(fromLocalAction(action))
         },
     )
 
     companion object {
-        fun <STATE : Any, ACTION : Any> create(
+        fun <STATE : Any, ACTION : Any, ENVIRONMENT : Any> create(
             initialState: STATE,
-            reducer: (STATE, ACTION) -> FlowReduced<STATE, ACTION>,
+            reducer: FlowReducer<STATE, ACTION, ENVIRONMENT>,
+            environment: ENVIRONMENT,
             storeScopeProvider: StoreScopeProvider,
             dispatcherProvider: DispatcherProvider,
         ): CoroutineStore<STATE, ACTION> {
             val storeScope = storeScopeProvider.getStoreScope()
             val state = MutableStateFlow(initialState)
+
             lateinit var sendAction: (ACTION) -> Unit
             sendAction = { action: ACTION ->
                 storeScope.launch(context = dispatcherProvider.main) {
-                    val (nextState, effect) = reducer(initialState, action)
+                    val (nextState, effect) = reducer.reduce(state.value, action, environment)
                     state.update { nextState }
                     effect.collectLatest {
                         sendAction(it)
