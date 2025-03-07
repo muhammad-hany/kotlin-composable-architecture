@@ -1,0 +1,10 @@
+package com.xm.examples.coroutine.store
+
+import com.xm.examples.coroutine.ui.model.SurveyQuestion
+
+data class SurveyState(
+    val surveyQuestions: List<SurveyQuestion> = emptyList(),
+    val isLoading: Boolean = false,
+) {
+    val answeredQuestionsCount = surveyQuestions.count { it.answer != null && it.successfullyAnswered }
+}

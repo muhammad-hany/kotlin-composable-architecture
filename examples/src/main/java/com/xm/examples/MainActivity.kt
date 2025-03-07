@@ -9,7 +9,7 @@ import com.xm.examples.cases.EffectsBasic
 import com.xm.examples.cases.EffectsCancellation
 import com.xm.examples.cases.GettingStartedCompositionTwoCounters
 import com.xm.examples.cases.GettingStartedCompositionTwoCountersCompose
-import com.xm.examples.cases.GettingStartedCounter
+import com.xm.examples.coroutine.CoroutineComposeFragment
 import com.xm.examples.databinding.ActivityMainBinding
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.selectedScreen.subscribe {
             when (it) {
-                Screen.Counter -> goToScreen(GettingStartedCounter())
+                Screen.Counter -> goToScreen(CoroutineComposeFragment())
                 Screen.TwoCounters -> goToScreen(GettingStartedCompositionTwoCounters())
                 Screen.TwoCountersCompose -> goToScreen(GettingStartedCompositionTwoCountersCompose())
                 Screen.EffectsBasic -> goToScreen(EffectsBasic())
