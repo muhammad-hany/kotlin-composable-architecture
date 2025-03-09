@@ -11,6 +11,11 @@ dependencies {
     implementation libraries.kotlin.jdk
     implementation libraries.rx.java
 
+    // Core Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
+    // Android-specific Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
+
     testImplementation libraries.junit
 }
 
